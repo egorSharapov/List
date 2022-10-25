@@ -5,4 +5,7 @@
 
 unsigned long list_check (List *list);
 
+
+extern FILE *dump_file;
+
 #endif
