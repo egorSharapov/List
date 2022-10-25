@@ -328,17 +328,17 @@ void list_sort (List *list)
 
 
 
-void create_cash (List *list, int cash_size, int begin_index)
-{
-    list->cash_nodes = (Node*) calloc (cash_size, sizeof (list->nodes[0]));
+// void create_cash (List *list, int cash_size, int begin_index)
+// {
+//     list->cash_nodes = (Node*) calloc (cash_size, sizeof (list->nodes[0]));
 
-    if (list->cash_nodes == NULL)
-        printf ("calloc list cash error");
+//     if (list->cash_nodes == NULL)
+//         printf ("calloc list cash error");
 
 
-    for (int index = 0; index < cash_size; index++)
-    {
-        list;
-    }
+//     for (int index = 0; index < cash_size; index++)
+//     {
+//         list
+//     }
     
-}
+// }
