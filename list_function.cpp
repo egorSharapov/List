@@ -4,6 +4,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <windows.h>
+#include "utilities.hpp"
 
 int dump_counter = 0;
 
@@ -327,34 +328,17 @@ void list_sort (List *list)
 
 
 
-FILE *open_file (const char *file_name ,const char *mode)
-{
-    FILE *file = fopen (file_name, "wb");
-
-    if (file == NULL)
-        printf ("open file error");
-
-    return file;
-}
-
-
-void *recalloc(void *ptr, size_t num, size_t size)
-{
-    size_t temp_size = _msize(ptr);
-    
-    ptr = realloc (ptr, size*num);
-
-    if (!ptr and (num*size > temp_size))
-        memset ((char *) ptr + temp_size, 0, num*size - temp_size);
-
-    return ptr;
-}
-
-
-void create_cash (List *list, int cash_size)
+void create_cash (List *list, int cash_size, int begin_index)
 {
     list->cash_nodes = (Node*) calloc (cash_size, sizeof (list->nodes[0]));
 
     if (list->cash_nodes == NULL)
         printf ("calloc list cash error");
+
+
+    for (int index = 0; index < cash_size; index++)
+    {
+        list;
+    }
+    
 }

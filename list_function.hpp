@@ -66,7 +66,6 @@ int    list_insert (List *list, Elem_t value, int insert_index);
 Elem_t list_remove (List *list, int remove_index);
 Elem_t list_pop    (List *list);
 void   list_fit    (List *list);
-FILE  *open_file   (const char *file_name ,const char *mode);
-void  *recalloc    (void *ptr, size_t num, size_t size);
+
 
 #endif
