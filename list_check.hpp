@@ -31,17 +31,16 @@ enum LIST_ERRORS
 enum CHECK_MODE
 {
     SIMPLE = 0,
-    FULL = 1,
+    FULL   = 1,
 };
 
 unsigned long list_check (List *list, CHECK_MODE mode);
 
-bool   list_check_data (List *list);
-bool   list_check_free (List *list);
-void   list_dump_ (FILE *file, List *list, const char *func_name, const char *file_name, const int line);
-void   graph_list_dump (List *list);
-void   print_list_error (FILE* dump_file, unsigned long errors_code);
-
+bool list_check_data   (List *list);
+bool list_check_free   (List *list);
+void list_dump_        (FILE *file, List *list, const char *func_name, const char *file_name, const int line);
+void graph_list_dump   (List *list);
+void print_list_error  (FILE* dump_file, unsigned long errors_code);
 void build_png_to_html ();
 
 #endif

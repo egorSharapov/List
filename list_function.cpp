@@ -32,7 +32,7 @@ void list_ctor (List *list, size_t list_size)
 
 void list_dtor (List *list)
 {
-    assert (list);
+    LIST_OK (list);
 
     free (list->nodes);
     list->nodes = NULL;
@@ -79,9 +79,27 @@ size_t list_translate_physical_position_to_logical_adress_dont_call_this_functio
     return logical_position;
 }
 
-void list_push (List  *list, Elem_t value)
+Elem_t list_find_value_by_logical_index (List *list, size_t index)
+{
+    size_t phys_pos = list_translate_logical_index_to_physical_position_dont_call_this_function (list, index);
+
+    return list->nodes[phys_pos].val;
+}
+
+size_t list_next_el (List *list, size_t current_element)
+{
+    return list->nodes[current_element].next;
+}
+
+size_t list_prev_el (List *list, size_t current_element)
+{
+    return list->nodes[current_element].prev;
+}
+
+size_t list_insert_end (List  *list, Elem_t value)
 {
     list_insert_after (list, value, list->tale);
+    return list->capacity;
 }
 
 Elem_t list_pop (List *list)
@@ -331,4 +349,22 @@ void list_fill_free (List *list, size_t begin, size_t end)
     }
     list->nodes[end].next = 0;
     list->nodes[end].prev = - 1;
+}
+
+void list_clear (List *list)
+{
+    list_fill_free (list, 1, list->capacity - 1);
+    list->free = 1;
+    list->head = 1;
+    list->tale = 1;
+}
+
+size_t list_find_value (List *list, Elem_t value)
+{
+    size_t next = list->head;
+
+    while (list->nodes[next].val != value and next != 0)
+        next = list->nodes[next].next;
+
+    return next;
 }

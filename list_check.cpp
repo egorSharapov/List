@@ -62,7 +62,15 @@ bool list_check_data (List *list)
 
 bool list_check_free (List *list)
 {
-    return 1;
+    int next = list->free;
+    for (size_t index = 0; index < list->capacity - list->size; index++)
+    {
+        if (list->nodes[next].prev != -1)
+            return 1;
+        
+        next = list->nodes[next].next;
+    }
+    return 0;
 }
 
 
@@ -151,9 +159,9 @@ void list_dump_ (FILE *dump_file, List *list, const char *func_name, const char 
 
 void graph_list_dump (List *list)
 {
-    FILE *graph_file = fopen ("out\\input.dot", "wb");
+    FILE *graph_file = fopen ("out\\input.dot", "w");
 
-    fprintf (graph_file, "digraph {\n    splines=ortho;\n    node [nodesep = 0.8, width = 0.5];\n    rankdir=LR;\n");
+    fprintf (graph_file, "digraph {\n    splines=ortho\n    rankdir=LR\n");
     for (size_t index = 0; index < list->capacity; index++)
     {
         fprintf (graph_file, "    struct%d [shape= Mrecord, label = \"%d|", index, index);
@@ -163,18 +171,18 @@ void graph_list_dump (List *list)
         else 
             fprintf (graph_file, "P");
         
-        fprintf (graph_file,"|{%d|%d}\"];\n", list->nodes[index].prev, list->nodes[index].next);
+        fprintf (graph_file,"|{%d|%d}\"]\n", list->nodes[index].prev, list->nodes[index].next);
     }
     fprintf (graph_file, "\n    ");
 
     for (size_t index = 0; index < list->capacity - 1; index++)
     {
-        fprintf (graph_file, "struct%d -> struct%d [style = \"invis\", weight = 300]\n    ", index, index + 1);
+        fprintf (graph_file, "struct%d -> struct%d [style = \"invis\", weight = 200]\n    ", index, index + 1);
     }
     
     fprintf (graph_file, "\n    ");
 
-    fprintf (graph_file, "free->struct%d [weight = 1]\n    ", list->free);
+    fprintf (graph_file, "free->struct%d {rank = same; free; struct%d;}\n    ", list->free, list->free);
 
 
     fprintf (graph_file, "edge [dir = both, color = blue]\n    ");
@@ -183,10 +191,12 @@ void graph_list_dump (List *list)
 
     for (size_t index = 0; index < list->size - 2; index++)
     {
-        fprintf (graph_file, "struct%d ->", next);
+        fprintf (graph_file, "struct%d -> struct%d [splines = ortho]\n    ", next, list->nodes[next].next);
         next = list->nodes[next].next;
     }
-    fprintf (graph_file, "struct%d;\n    ", list->tale);
+    fprintf (graph_file, "\n    ");
+
+    //fprintf (graph_file, "struct%d;\n    ", list->tale);
 
 
     fprintf (graph_file, "edge [dir = right, color = gold]\n    ");
@@ -198,8 +208,8 @@ void graph_list_dump (List *list)
         fprintf (graph_file, "struct%d ->", next);
         next = list->nodes[next].next;
     }
-    fprintf (graph_file, "struct%d;\n    ", next);
-    fprintf (graph_file, "struct%d -> struct0 [color = black];\n}", next);
+    fprintf (graph_file, "struct%d\n    ", next);
+    fprintf (graph_file, "struct%d -> struct0 [splines = ortho, color = black]\n}", next);
 
     fclose (graph_file);
 

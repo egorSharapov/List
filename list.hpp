@@ -11,7 +11,7 @@ struct info
 {
     const char *func_name  = NULL;
     const char *file_name  = NULL;
-    const char *list_name = NULL;
+    const char *list_name  = NULL;
     int         line       = 0;
 };
 
@@ -32,9 +32,9 @@ typedef struct
     size_t  capacity = 0;
     size_t  size     = 0;
 
-    size_t tale    = 0;
-    size_t head    = 0;
-    size_t free    = 0;
+    size_t tale      = 0;
+    size_t head      = 0;
+    size_t free      = 0;
 
     bool   is_linear = true;
 } List;
