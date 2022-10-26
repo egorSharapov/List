@@ -27,12 +27,13 @@ void list_ctor (List *list, size_t list_size)
     list->nodes[0].prev = 0;
 
     list_fill_free (list, list->head, list->capacity - 1);
-
 }
 
 void list_dtor (List *list)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     free (list->nodes);
     list->nodes = NULL;
@@ -48,7 +49,9 @@ void list_dtor (List *list)
 
 size_t list_translate_logical_index_to_physical_position_dont_call_this_function (List *list, size_t logical_index)
 {
-    assert (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     size_t physical_position = list->head;
 
@@ -62,7 +65,9 @@ size_t list_translate_logical_index_to_physical_position_dont_call_this_function
 
 size_t list_translate_physical_position_to_logical_adress_dont_call_this_function (List *list, size_t physical_position)
 {
-    assert (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     size_t logical_position = 1;
 
@@ -111,7 +116,9 @@ Elem_t list_pop (List *list)
 
 size_t list_insert_before (List *list, Elem_t value, size_t insert_index)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     if (list->nodes[insert_index].prev == -1 and list->head != list->tale)
     {
@@ -123,19 +130,21 @@ size_t list_insert_before (List *list, Elem_t value, size_t insert_index)
         list_resize (list);
 
     list->is_linear = false;
-    list->head = list->free;
+
+    if (list->head == insert_index)
+        list->head = list->free;
 
     size_t new_free = list->nodes[list->free].next;
     
-
     list->nodes[list->free].val = value;
 
-    if (insert_index != list->tale or list->tale != list->head)
+    if (list->tale != list->head)
         list->nodes[list->free].next = insert_index;
     else
         list->nodes[list->free].next = 0;
     
-    //list->nodes[list->nodes[insert_index].prev].next = list->free;
+    if (list->tale != list->head)
+        list->nodes[list->nodes[insert_index].prev].next = list->free;
 
     list->nodes[list->free].prev = list->nodes[insert_index].prev;
     list->nodes[insert_index].prev = list->free;
@@ -153,7 +162,9 @@ size_t list_insert_before (List *list, Elem_t value, size_t insert_index)
 
 size_t list_insert_after (List *list, Elem_t value, size_t insert_index)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     if (list->nodes[insert_index].prev == -1 and list->head != list->tale)
     {
@@ -174,17 +185,21 @@ size_t list_insert_after (List *list, Elem_t value, size_t insert_index)
 
     list->nodes[list->free].val = value;
 
-    if (insert_index != list->head or list->tale != list->head)
+    if (list->tale != list->head)
         list->nodes[list->free].prev = insert_index;
     else
         list->nodes[list->free].prev = 0;
     
+    if (list->tale != list->head and list->nodes[insert_index].next != 0)
+        list->nodes[list->nodes[insert_index].next].prev = list->free;
+
     list->nodes[list->free].next = list->nodes[insert_index].next;
     list->nodes[insert_index].next = list->free;
     
     if (list->tale == insert_index)
+    {
         list->nodes[list->free].next = 0;
-
+    }
     list->free = new_free;
     list->size += 1;
 
@@ -196,15 +211,15 @@ size_t list_insert_after (List *list, Elem_t value, size_t insert_index)
 
 Elem_t list_remove (List *list, size_t remove_index)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     if (list->nodes[remove_index].prev == -1)
         printf ("ERROR remove free zone\n");
 
     Elem_t remove_val = val_posion;
 
-
-    //size_t new_free = list->nodes[list->free].next;
 
     //___ связывание соседних элементов_____________
     int next_index = list->nodes[remove_index].next;
@@ -236,7 +251,9 @@ Elem_t list_remove (List *list, size_t remove_index)
 
 void list_resize (List *list)
 {
-    assert (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     size_t old_capacity = list->capacity;
 
@@ -259,7 +276,9 @@ void list_resize (List *list)
 
 void list_fit (List *list)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     list_sort (list);
     
@@ -269,7 +288,9 @@ void list_fit (List *list)
 
 void list_sort (List *list)
 {
-    LIST_OK (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     Node *new_nodes = (Node *) calloc (list->capacity, sizeof(list->nodes[0]));
 
@@ -326,7 +347,9 @@ void list_sort (List *list)
 
 size_t list_free_mem (List *list)
 {
-    assert (list);
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
 
     size_t free_mem = 0;
     size_t next = list->free;
@@ -341,6 +364,8 @@ size_t list_free_mem (List *list)
 
 void list_fill_free (List *list, size_t begin, size_t end)
 {
+    assert (list);
+
     for (size_t index = begin; index < end + 1; index++)
     {
         list->nodes[index].val = val_posion;
@@ -353,6 +378,8 @@ void list_fill_free (List *list, size_t begin, size_t end)
 
 void list_clear (List *list)
 {
+    assert (list);
+
     list_fill_free (list, 1, list->capacity - 1);
     list->free = 1;
     list->head = 1;
@@ -361,6 +388,8 @@ void list_clear (List *list)
 
 size_t list_find_value (List *list, Elem_t value)
 {
+    assert (list);
+
     size_t next = list->head;
 
     while (list->nodes[next].val != value and next != 0)

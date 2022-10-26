@@ -6,7 +6,7 @@
 #define LIST_OK(list)    unsigned long errors = list_check (list, SIMPLE);    \
                           if (errors != 0)                            \
                           {                                           \
-                                           \
+                              print_list_error (dump_file, errors);   \
                               list_dump (dump_file, list);            \
                               exit(errors);                           \
                           }

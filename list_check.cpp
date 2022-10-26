@@ -8,7 +8,6 @@ int dump_counter = 0;
 unsigned long list_check (List *list, CHECK_MODE mode)
 {
     unsigned long error = 0;
-
     if (list == NULL)
     {
         error = error | (1 << LIST_NULL_PTR_ERROR);
@@ -24,8 +23,9 @@ unsigned long list_check (List *list, CHECK_MODE mode)
         error = error | (1 << CAPACITY_ERROR);
 
     if ((int) list->head < 0)
+    {
         error = error | (1 << HEAD_ERROR);
-    
+    }
     if ((int) list->tale < 0)
         error = error | (1 << TALE_ERROR);
 
@@ -35,9 +35,8 @@ unsigned long list_check (List *list, CHECK_MODE mode)
     if (mode == FULL and error == 0)
     {
         error = error | (1 << list_check_data (list));
-        list_check_free (list);
+        error = error | (1 << list_check_free (list));
     }
-
     return error;
 }
 
@@ -84,6 +83,15 @@ void print_list_error (FILE* dump_file, unsigned long errors_code)
     
     if (errors_code >> CAPACITY_ERROR & 1)
         fprintf (dump_file, "CAPACITY ERROR\n");
+
+    if (errors_code >> HEAD_ERROR & 1)
+        fprintf (dump_file, "HEAD_ERROR\n");
+
+    if (errors_code >> TALE_ERROR & 1)
+        fprintf (dump_file, "TALE_ERROR\n");
+    
+    if (errors_code >> FREE_ERROR & 1)
+        fprintf (dump_file, "FREE_ERROR\n");
     
     // if (errors_code >> LEFT_CANARY_ERROR & 1)
     //     fprintf (output_file, "LEFT CANARY ERROR\n");

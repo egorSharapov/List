@@ -10,5 +10,5 @@ CFLAGS =  -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-eq
 OBJ_FOLDER = release/
 
 list:
-	$(CC) $(CFLAGS) main.cpp list_check.cpp list_function.cpp utilities.cpp -o $(OBJ_FOLDER)prog
+	$(CC) $(CFLAGS) main.cpp list_check.cpp list_function.cpp utilities.cpp -DDEBUG -o $(OBJ_FOLDER)prog
 
