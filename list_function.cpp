@@ -397,3 +397,14 @@ size_t list_find_value (List *list, Elem_t value)
 
     return next;
 }
+
+Elem_t list_find_value_by_logical_index (List *list, size_t index)
+{
+    #ifdef DEBUG
+        LIST_OK (list);
+    #endif
+
+    size_t phys_pos = list_translate_logical_index_to_physical_position_dont_call_this_function (list, index);
+
+    return list->nodes[phys_pos].val;
+}
