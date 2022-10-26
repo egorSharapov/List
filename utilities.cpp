@@ -4,10 +4,10 @@
 
 FILE *open_file (const char *file_name ,const char *mode)
 {
-    FILE *file = fopen (file_name, "wb");
+    FILE *file = fopen (file_name, mode);
 
     if (file == NULL)
-        printf ("open file error");
+        printf ("open file error %s", file_name);
 
     return file;
 }

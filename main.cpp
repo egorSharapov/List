@@ -1,34 +1,37 @@
 #include "list_function.hpp"
+#include "list_check.hpp"
 #include "utilities.hpp"
-
-const char *dump_file_name = "out\\list_dump.txt";
+  
+const char *dump_file_name = "out\\list_dump_file.txt";
+FILE *dump_file = open_file (dump_file_name, "wb");;
 
 int main ()
 {
     List list = {};
 
-    FILE *dump_file = open_file (dump_file_name, "wb");
-    list_ctor (&list, 9);
+    list_ctor (&list, 4);
 
     for (int i = 1; i < 10; i++)
     {
         list_dump (dump_file, &list);
-        list_insert (&list, i*10, list.tale);
+        list_insert_after (&list, i*10, list.tale);
     }
-
-    list_dump (dump_file, &list);
     graph_list_dump (&list);
-    list_remove (&list, 6);
+    list_insert_before (&list, 300, list.head);
     list_dump (dump_file, &list);
     list_remove (&list, 5);
-    list_dump (dump_file, &list);
-    list_insert (&list, 300, 4);
-    list_dump (dump_file, &list);
-    list_sort (&list);
-    list_dump (dump_file, &list);
-    list_fit (&list);
-    list_dump (dump_file, &list);
-    list_dtor (&list);
-    return 0;
 
+    list_dump (dump_file, &list);
+
+    printf ("physical position = %u\n", list_translate_logical_index_to_physical_position_dont_call_this_function (&list, 5));
+    printf ("logical adress = %u\n", list_translate_physical_position_to_logical_adress_dont_call_this_function (&list, 3));
+    printf ("free mem = %u\n", list_free_mem (&list));
+    
+    graph_list_dump (&list);
+    
+    list_dtor (&list);
+
+    build_png_to_html ();
+
+    return 0;
 }

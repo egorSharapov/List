@@ -1,6 +1,11 @@
 #include "list_check.hpp"
+#include <windows.h>
+#include <assert.h>
+#include "utilities.hpp"
 
-unsigned long list_check (List *list)
+int dump_counter = 0;
+
+unsigned long list_check (List *list, CHECK_MODE mode)
 {
     unsigned long error = 0;
 
@@ -9,7 +14,6 @@ unsigned long list_check (List *list)
         error = error | (1 << LIST_NULL_PTR_ERROR);
         return error;
     }
-
     if  ((int) list->size > (int) list->capacity)
         error = error | (1 << SIZE_MORE_THAN_CAPACITY_ERROR);
     
@@ -27,13 +31,42 @@ unsigned long list_check (List *list)
 
     if ((int) list->free < 0)
         error = error | (1 << FREE_ERROR); 
-    
+
+    if (mode == FULL and error == 0)
+    {
+        error = error | (1 << list_check_data (list));
+        list_check_free (list);
+    }
+
     return error;
 }
 
 
+bool list_check_data (List *list)
+{
+    int next = list->head; 
+    int prev = 0;
 
-void print_list_error (unsigned long errors_code)
+    for (size_t index = 0; index < list->size; index++)
+    {
+        if (list->nodes[next].next < 0)
+            return 1;
+        if (list->nodes[next].prev != prev)
+            return 1;
+        
+        prev = next;
+        next = list->nodes[next].next;
+    }
+    return 0;
+}
+
+bool list_check_free (List *list)
+{
+    return 1;
+}
+
+
+void print_list_error (FILE* dump_file, unsigned long errors_code)
 {
     if (errors_code >> SIZE_MORE_THAN_CAPACITY_ERROR & 1)
         fprintf (dump_file, "SIZE_MORE_THAN_CAPACITY_ERRO\n");
@@ -65,4 +98,131 @@ void print_list_error (unsigned long errors_code)
     // if (errors_code >> HASH_ERROR & 1)
     //     fprintf (output_file, "HASH ERROR\n");
     // #endif 
+}
+
+
+void list_dump_ (FILE *dump_file, List *list, const char *func_name, const char *file_name, const int line)
+{
+    assert (list);
+    assert (dump_file);
+    
+    fprintf (dump_file, "\n%s() at %s.cpp (%d)\n", func_name, file_name, line);
+    fprintf (dump_file, " size = %d\n capacity = %d\n", list->size, list->capacity);
+    fprintf (dump_file, " is_linear = %d\n\n", list->is_linear);
+    
+    for (size_t index = 0; index < list->capacity; index++)
+    {
+        if (index == list->free)
+            fprintf (dump_file, "|>free");
+        else if  (index == list->head)
+            fprintf (dump_file, "|>head");
+        else if (index == list->tale)
+            fprintf (dump_file, "|>tale");
+        else
+            fprintf (dump_file, "      ");
+    }
+
+    fprintf (dump_file, "\n|");
+
+    for (size_t index = 0; index < list->capacity; index++)
+    {
+        fprintf (dump_file, " %03d |", index);
+    }
+
+    fprintf (dump_file, "\n|");
+    
+    for (size_t index = 0; index < list->capacity; index++)
+    {
+        if (list->nodes[index].val != val_posion)
+            fprintf (dump_file, " %3d |", list->nodes[index].val);
+        else
+            fprintf (dump_file, "  P  |");
+    }
+
+    fprintf (dump_file, "\n|");
+
+    for (size_t index = 0; index < list->capacity; index++)
+    {
+        fprintf (dump_file, "%2d|%2d|", list->nodes[index].prev, list->nodes[index].next);
+    }
+    fprintf (dump_file, "\n\n");
+}
+
+
+void graph_list_dump (List *list)
+{
+    FILE *graph_file = fopen ("out\\input.dot", "wb");
+
+    fprintf (graph_file, "digraph {\n    splines=ortho;\n    node [nodesep = 0.8, width = 0.5];\n    rankdir=LR;\n");
+    for (size_t index = 0; index < list->capacity; index++)
+    {
+        fprintf (graph_file, "    struct%d [shape= Mrecord, label = \"%d|", index, index);
+        
+        if (list->nodes[index].val != val_posion)
+            fprintf (graph_file, "%d", list->nodes[index].val);
+        else 
+            fprintf (graph_file, "P");
+        
+        fprintf (graph_file,"|{%d|%d}\"];\n", list->nodes[index].prev, list->nodes[index].next);
+    }
+    fprintf (graph_file, "\n    ");
+
+    for (size_t index = 0; index < list->capacity - 1; index++)
+    {
+        fprintf (graph_file, "struct%d -> struct%d [style = \"invis\", weight = 300]\n    ", index, index + 1);
+    }
+    
+    fprintf (graph_file, "\n    ");
+
+    fprintf (graph_file, "free->struct%d [weight = 1]\n    ", list->free);
+
+
+    fprintf (graph_file, "edge [dir = both, color = blue]\n    ");
+
+    size_t next = list->head;
+
+    for (size_t index = 0; index < list->size - 2; index++)
+    {
+        fprintf (graph_file, "struct%d ->", next);
+        next = list->nodes[next].next;
+    }
+    fprintf (graph_file, "struct%d;\n    ", list->tale);
+
+
+    fprintf (graph_file, "edge [dir = right, color = gold]\n    ");
+
+    next = list->free;
+
+    for (size_t index = 0; index < list->capacity - list->size - 1; index++)
+    {
+        fprintf (graph_file, "struct%d ->", next);
+        next = list->nodes[next].next;
+    }
+    fprintf (graph_file, "struct%d;\n    ", next);
+    fprintf (graph_file, "struct%d -> struct0 [color = black];\n}", next);
+
+    fclose (graph_file);
+
+
+    dump_counter += 1;
+
+    char cmd_string[100] = "";
+
+    sprintf (cmd_string, "dot out\\input.dot -Tpng -o out\\output%d.png", dump_counter);
+    system (cmd_string);
+}
+
+
+void build_png_to_html ()
+{
+    FILE* file = open_file ("out\\output.html", "wb");
+
+    fprintf (file, " <pre>\n\n");
+    
+    for (int index = 1; index < dump_counter + 1; index++)
+    {
+        fprintf (file, "<image src = \"output%d.png\" /image>\n", index);
+    }
+
+    fclose (file);
 }

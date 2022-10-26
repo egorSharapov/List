@@ -3,10 +3,11 @@
 #include <assert.h>
 #include <malloc.h>
 #include <string.h>
-#include <windows.h>
 #include "utilities.hpp"
+#include "list_check.hpp"
 
-int dump_counter = 0;
+
+extern FILE *dump_file;
 
 void list_ctor (List *list, size_t list_size)
 {
@@ -20,19 +21,13 @@ void list_ctor (List *list, size_t list_size)
     list->tale = 1;
     list->size = 1;
     list->free = 1;
-    
+
     list->nodes[0].val  = 0;
     list->nodes[0].next = 0;
     list->nodes[0].prev = 0;
 
-    for (int index = list->head; index < list->capacity; index++)
-    {
-        list->nodes[index].val = val_posion;
-        list->nodes[index].next = index + 1;
-        list->nodes[index].prev = - 1;
-    }
-    list->nodes[list->capacity - 1].next = 0;
-    list->nodes[list->capacity - 1].prev = - 1;
+    list_fill_free (list, list->head, list->capacity - 1);
+
 }
 
 void list_dtor (List *list)
@@ -51,10 +46,42 @@ void list_dtor (List *list)
     list = NULL;
 }
 
+size_t list_translate_logical_index_to_physical_position_dont_call_this_function (List *list, size_t logical_index)
+{
+    assert (list);
+
+    size_t physical_position = list->head;
+
+    for (size_t index = 1; index < logical_index; index++)
+    {
+        physical_position = list->nodes[physical_position].next;
+    }
+
+    return physical_position;
+}
+
+size_t list_translate_physical_position_to_logical_adress_dont_call_this_function (List *list, size_t physical_position)
+{
+    assert (list);
+
+    size_t logical_position = 1;
+
+    if (list->nodes[physical_position].prev == -1 or physical_position >= list->capacity)
+        return -1;
+
+    size_t index = physical_position;
+
+    while (index != list->head)
+    {
+        index = list->nodes[index].prev;
+        logical_position += 1;
+    }
+    return logical_position;
+}
 
 void list_push (List  *list, Elem_t value)
 {
-    list_insert (list, value, list->tale);
+    list_insert_after (list, value, list->tale);
 }
 
 Elem_t list_pop (List *list)
@@ -64,9 +91,51 @@ Elem_t list_pop (List *list)
 }
 
 
-int list_insert (List *list, Elem_t value, int insert_index)
+size_t list_insert_before (List *list, Elem_t value, size_t insert_index)
 {
-    assert (list);
+    LIST_OK (list);
+
+    if (list->nodes[insert_index].prev == -1 and list->head != list->tale)
+    {
+        printf ("wrong index\n");
+        return insert_index;
+    }
+
+    if (list->capacity == list->size)
+        list_resize (list);
+
+    list->is_linear = false;
+    list->head = list->free;
+
+    size_t new_free = list->nodes[list->free].next;
+    
+
+    list->nodes[list->free].val = value;
+
+    if (insert_index != list->tale or list->tale != list->head)
+        list->nodes[list->free].next = insert_index;
+    else
+        list->nodes[list->free].next = 0;
+    
+    //list->nodes[list->nodes[insert_index].prev].next = list->free;
+
+    list->nodes[list->free].prev = list->nodes[insert_index].prev;
+    list->nodes[insert_index].prev = list->free;
+    
+    if (list->head == insert_index)
+        list->nodes[list->free].prev = 0;
+
+    list->free = new_free;
+    list->size += 1;
+
+    
+
+    return insert_index;
+}
+
+size_t list_insert_after (List *list, Elem_t value, size_t insert_index)
+{
+    LIST_OK (list);
 
     if (list->nodes[insert_index].prev == -1 and list->head != list->tale)
     {
@@ -82,7 +151,7 @@ int list_insert (List *list, Elem_t value, int insert_index)
     else
         list->tale = list->free;
 
-    int new_free = list->nodes[list->free].next;
+    size_t new_free = list->nodes[list->free].next;
     
 
     list->nodes[list->free].val = value;
@@ -107,13 +176,17 @@ int list_insert (List *list, Elem_t value, int insert_index)
 }
 
 
-Elem_t list_remove (List *list, int remove_index)
+Elem_t list_remove (List *list, size_t remove_index)
 {
+    LIST_OK (list);
+
+    if (list->nodes[remove_index].prev == -1)
+        printf ("ERROR remove free zone\n");
+
     Elem_t remove_val = val_posion;
 
-    assert (list);
 
-    int new_free = list->nodes[list->free].next;
+    //size_t new_free = list->nodes[list->free].next;
 
     //___ связывание соседних элементов_____________
     int next_index = list->nodes[remove_index].next;
@@ -143,121 +216,6 @@ Elem_t list_remove (List *list, int remove_index)
     return remove_val;
 }
 
-
-
-void list_dump (FILE *dump_file, List *list)
-{
-    assert (list);
-
-    fprintf (dump_file, " size = %d\n capacity = %d\n", list->size, list->capacity);
-    fprintf (dump_file, " is_linear = %d\n\n", list->is_linear);
-    
-    for (int index = 0; index < list->capacity; index++)
-    {
-        if (index == list->free)
-            fprintf (dump_file, "|>free");
-        else if  (index == list->head)
-            fprintf (dump_file, "|>head");
-        else if (index == list->tale)
-            fprintf (dump_file, "|>tale");
-        else
-            fprintf (dump_file, "      ");
-    }
-
-    fprintf (dump_file, "\n|");
-
-    for (int index = 0; index < list->capacity; index++)
-    {
-        fprintf (dump_file, " %03d |", index);
-    }
-
-    fprintf (dump_file, "\n|");
-    
-    for (int index = 0; index < list->capacity; index++)
-    {
-        if (list->nodes[index].val != val_posion)
-            fprintf (dump_file, " %3d |", list->nodes[index].val);
-        else
-            fprintf (dump_file, "  P  |");
-    }
-
-    fprintf (dump_file, "\n|");
-
-    for (int index = 0; index < list->capacity; index++)
-    {
-        fprintf (dump_file, "%2d|%2d|", list->nodes[index].prev, list->nodes[index].next);
-    }
-    fprintf (dump_file, "\n\n");
-}
-
-
-void graph_list_dump (List *list)
-{
-    FILE *graph_file = fopen ("out\\input.dot", "wb");
-
-    fprintf (graph_file, "digraph {\n    node [shape=Mrecord, width = 0.5];\n    rankdir=LR;\n");
-    fprintf (graph_file, "    free [shape = Mrecord];\n");
-    for (int index = 0; index < list->capacity; index++)
-    {
-        fprintf (graph_file, "    struct%d [shape= Mrecord, label = \"%d|", index, index);
-        
-        if (list->nodes[index].val != val_posion)
-            fprintf (graph_file, "%d", list->nodes[index].val);
-        else 
-            fprintf (graph_file, "P");
-        
-        fprintf (graph_file,"|{%d|%d}\"];\n", list->nodes[index].prev, list->nodes[index].next);
-    }
-
-    fprintf (graph_file, "\n    ");
-
-    fprintf (graph_file, "edge [dir = both, color = white]\n    ");
-
-    for (int index = 0; index < list->capacity - 1; index++)
-    {
-        fprintf (graph_file, "struct%d ->", index);
-    }
-    fprintf (graph_file, "struct%d;\n    ", list->capacity - 1);
-
-    fprintf (graph_file, "edge [dir = both, color = blue]\n    ");
-    int next = list->head;
-
-    for (int index = 0; index < list->size - 2; index++)
-    {
-        fprintf (graph_file, "struct%d ->", next);
-        next = list->nodes[next].next;
-    }
-    fprintf (graph_file, "struct%d;\n    ", list->tale);
-
-
-    fprintf (graph_file, "edge [dir = right, color = gold]\n");
-
-    next = list->free;
-
-    for (int index = 0; index < list->capacity - list->size; index++)
-    {
-        fprintf (graph_file, "struct%d ->", next);
-        next = list->nodes[next].next;
-    }
-    fprintf (graph_file, "struct%d;\n}", next);
-
-    fclose (graph_file);
-
-
-    dump_counter += 1;
-    system ("dot -Tsvg out\\input.dot > out\\output%d.svg");
-
-}
-
-// char *make_command (int dump_counter)
-// {
-//     char *origin = "dot -Tsvg out\\input.dot > out\\output";
-//     char *buffer = (char *) calloc (strlen (origin)*2, sizeof (char));
-
-//     buffer = strcpy( buffer, origin);
-//     boffer = strcat (buffer,);
-// }
-
 void list_resize (List *list)
 {
     assert (list);
@@ -271,7 +229,7 @@ void list_resize (List *list)
     if (list->nodes == NULL)
         printf ("calloc error");
 
-    for (int index = old_capacity; index < list->capacity; index++)
+    for (size_t index = old_capacity; index < list->capacity; index++)
     {
         list->nodes[index].val = val_posion;
         list->nodes[index].next = index + 1;
@@ -283,6 +241,8 @@ void list_resize (List *list)
 
 void list_fit (List *list)
 {
+    LIST_OK (list);
+
     list_sort (list);
     
     list->capacity = list->size;
@@ -291,6 +251,8 @@ void list_fit (List *list)
 
 void list_sort (List *list)
 {
+    LIST_OK (list);
+
     Node *new_nodes = (Node *) calloc (list->capacity, sizeof(list->nodes[0]));
 
     int next = list->head;
@@ -300,7 +262,7 @@ void list_sort (List *list)
     new_nodes[0].next = 0;
     new_nodes[0].prev = 0;
 
-    for (int index = 1; index < list->size; index++)
+    for (size_t index = 1; index < list->size; index++)
     {
         new_nodes[index].val = list->nodes[next].val;
         new_nodes[index].next = index + 1;
@@ -310,7 +272,7 @@ void list_sort (List *list)
 
     new_nodes[list->size - 1].next = 0;
 
-    for (int index = list->size; index < list->capacity; index++)
+    for (size_t index = list->size; index < list->capacity; index++)
     {
         new_nodes[index].val = val_posion;
         new_nodes[index].next = index + 1;
@@ -342,3 +304,31 @@ void list_sort (List *list)
 //     }
     
 // }
+
+
+size_t list_free_mem (List *list)
+{
+    assert (list);
+
+    size_t free_mem = 0;
+    size_t next = list->free;
+
+    while ((next = list->nodes[next].next) != 0)
+        free_mem += 1;
+    free_mem += 1;
+
+    return free_mem;
+}
+
+
+void list_fill_free (List *list, size_t begin, size_t end)
+{
+    for (size_t index = begin; index < end + 1; index++)
+    {
+        list->nodes[index].val = val_posion;
+        list->nodes[index].next = index + 1;
+        list->nodes[index].prev = - 1;
+    }
+    list->nodes[end].next = 0;
+    list->nodes[end].prev = - 1;
+}

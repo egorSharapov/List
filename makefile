@@ -1,6 +1,6 @@
 CC = g++
 
-CFLAGS ==  -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations 		\
+CFLAGS =  -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations 		\
 		  	-Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion	\
 			-Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wmissing-field-initializers 		\
 			-Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits         \
@@ -10,5 +10,5 @@ CFLAGS ==  -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-e
 OBJ_FOLDER = release/
 
 list:
-	$(CC)  main.cpp list_function.cpp -o prog
+	$(CC) $(CFLAGS) main.cpp list_check.cpp list_function.cpp utilities.cpp -o $(OBJ_FOLDER)prog
 
