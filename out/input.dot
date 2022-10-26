@@ -1,44 +1,51 @@
 digraph {
-    splines=ortho;
-    node [nodesep = 0.8, width = 0.5];
-    rankdir=LR;
-    struct0 [shape= Mrecord, label = "0|0|{0|0}"];
-    struct1 [shape= Mrecord, label = "1|10|{10|2}"];
-    struct2 [shape= Mrecord, label = "2|20|{1|3}"];
-    struct3 [shape= Mrecord, label = "3|30|{2|4}"];
-    struct4 [shape= Mrecord, label = "4|40|{3|6}"];
-    struct5 [shape= Mrecord, label = "5|P|{-1|11}"];
-    struct6 [shape= Mrecord, label = "6|60|{4|7}"];
-    struct7 [shape= Mrecord, label = "7|70|{6|8}"];
-    struct8 [shape= Mrecord, label = "8|80|{7|9}"];
-    struct9 [shape= Mrecord, label = "9|90|{8|0}"];
-    struct10 [shape= Mrecord, label = "10|300|{0|1}"];
-    struct11 [shape= Mrecord, label = "11|P|{-1|12}"];
-    struct12 [shape= Mrecord, label = "12|P|{-1|13}"];
-    struct13 [shape= Mrecord, label = "13|P|{-1|14}"];
-    struct14 [shape= Mrecord, label = "14|P|{-1|15}"];
-    struct15 [shape= Mrecord, label = "15|P|{-1|0}"];
+    splines=ortho
+    rankdir=LR
+    struct0 [shape= Mrecord, label = "0|0|{0|0}"]
+    struct1 [shape= Mrecord, label = "1|300|{0|2}"]
+    struct2 [shape= Mrecord, label = "2|12|{1|3}"]
+    struct3 [shape= Mrecord, label = "3|22|{2|4}"]
+    struct4 [shape= Mrecord, label = "4|32|{3|5}"]
+    struct5 [shape= Mrecord, label = "5|42|{4|6}"]
+    struct6 [shape= Mrecord, label = "6|62|{5|7}"]
+    struct7 [shape= Mrecord, label = "7|72|{6|8}"]
+    struct8 [shape= Mrecord, label = "8|82|{7|9}"]
+    struct9 [shape= Mrecord, label = "9|92|{8|0}"]
+    struct10 [shape= Mrecord, label = "10|P|{-1|11}"]
+    struct11 [shape= Mrecord, label = "11|P|{-1|12}"]
+    struct12 [shape= Mrecord, label = "12|P|{-1|13}"]
+    struct13 [shape= Mrecord, label = "13|P|{-1|14}"]
+    struct14 [shape= Mrecord, label = "14|P|{-1|15}"]
+    struct15 [shape= Mrecord, label = "15|P|{-1|0}"]
 
-    struct0 -> struct1 [style = "invis", weight = 300]
-    struct1 -> struct2 [style = "invis", weight = 300]
-    struct2 -> struct3 [style = "invis", weight = 300]
-    struct3 -> struct4 [style = "invis", weight = 300]
-    struct4 -> struct5 [style = "invis", weight = 300]
-    struct5 -> struct6 [style = "invis", weight = 300]
-    struct6 -> struct7 [style = "invis", weight = 300]
-    struct7 -> struct8 [style = "invis", weight = 300]
-    struct8 -> struct9 [style = "invis", weight = 300]
-    struct9 -> struct10 [style = "invis", weight = 300]
-    struct10 -> struct11 [style = "invis", weight = 300]
-    struct11 -> struct12 [style = "invis", weight = 300]
-    struct12 -> struct13 [style = "invis", weight = 300]
-    struct13 -> struct14 [style = "invis", weight = 300]
-    struct14 -> struct15 [style = "invis", weight = 300]
+    struct0 -> struct1 [style = "invis", weight = 200]
+    struct1 -> struct2 [style = "invis", weight = 200]
+    struct2 -> struct3 [style = "invis", weight = 200]
+    struct3 -> struct4 [style = "invis", weight = 200]
+    struct4 -> struct5 [style = "invis", weight = 200]
+    struct5 -> struct6 [style = "invis", weight = 200]
+    struct6 -> struct7 [style = "invis", weight = 200]
+    struct7 -> struct8 [style = "invis", weight = 200]
+    struct8 -> struct9 [style = "invis", weight = 200]
+    struct9 -> struct10 [style = "invis", weight = 200]
+    struct10 -> struct11 [style = "invis", weight = 200]
+    struct11 -> struct12 [style = "invis", weight = 200]
+    struct12 -> struct13 [style = "invis", weight = 200]
+    struct13 -> struct14 [style = "invis", weight = 200]
+    struct14 -> struct15 [style = "invis", weight = 200]
     
-    free->struct5 [weight = 1]
+    free->struct10 {rank = same; free; struct10;}
     edge [dir = both, color = blue]
-    struct10 ->struct1 ->struct2 ->struct3 ->struct4 ->struct6 ->struct7 ->struct8 ->struct9;
+    struct1 -> struct2 [splines = ortho]
+    struct2 -> struct3 [splines = ortho]
+    struct3 -> struct4 [splines = ortho]
+    struct4 -> struct5 [splines = ortho]
+    struct5 -> struct6 [splines = ortho]
+    struct6 -> struct7 [splines = ortho]
+    struct7 -> struct8 [splines = ortho]
+    struct8 -> struct9 [splines = ortho]
+    
     edge [dir = right, color = gold]
-    struct5 ->struct11 ->struct12 ->struct13 ->struct14 ->struct15;
-    struct15 -> struct0 [color = black];
+    struct10 ->struct11 ->struct12 ->struct13 ->struct14 ->struct15
+    struct15 -> struct0 [splines = ortho, color = black]
 }
