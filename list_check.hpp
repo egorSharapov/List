@@ -14,7 +14,10 @@
 #define list_dump(output_file, list) \
                           list_dump_(output_file, list, __FUNCTION__, __FILE__, __LINE__)
 
+#define graph_list_dump(list) \
+                          graph_list_dump_(list, __FUNCTION__, __FILE__, __LINE__)
 
+const int max_string_size = 100;
 
 enum LIST_ERRORS
 {
@@ -26,6 +29,7 @@ enum LIST_ERRORS
     LIST_NULL_PTR_ERROR    = 5,
     TALE_ERROR = 6,
     HEAD_ERROR = 7,
+    DATA_ERROR = 8,
 };
 
 enum CHECK_MODE
@@ -34,12 +38,12 @@ enum CHECK_MODE
     FULL   = 1,
 };
 
-unsigned long list_check (List *list, CHECK_MODE mode);
+unsigned long list_check      (List *list, CHECK_MODE mode);
 
-bool list_check_data   (List *list);
 bool list_check_free   (List *list);
+bool list_check_data   (List *list);
 void list_dump_        (FILE *file, List *list, const char *func_name, const char *file_name, const int line);
-void graph_list_dump   (List *list);
+void graph_list_dump_  (List *list, const char *func_name, const char *file_name, const int line);
 void print_list_error  (FILE* dump_file, unsigned long errors_code);
 void build_png_to_html ();
 

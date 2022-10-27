@@ -1,9 +1,13 @@
 #include "utilities.hpp"
 #include <string.h>
 #include <malloc.h>
+#include <assert.h>
 
 FILE *open_file (const char *file_name ,const char *mode)
 {
+    assert (file_name);
+    assert (mode);
+    
     FILE *file = fopen (file_name, mode);
 
     if (file == NULL)

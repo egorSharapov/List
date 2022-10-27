@@ -5,10 +5,9 @@
 #include "list.hpp"
 
 
-const size_t BASIC_LIST_SIZE = 10;
-
-const int multiple  = 2;
-const int cash_size = 10;
+const size_t basik_list_size = 10;
+const int    multiple        = 2;
+const int    cash_size       = 10;
 
 
 void   list_ctor      (List *list, size_t list_size);
@@ -17,7 +16,7 @@ void   list_resize    (List *list);
 void   list_sort      (List *list);
 void   list_fit       (List *list);
 void   list_clear     (List *list);
-void   list_fill_free (List *list, size_t begin, size_t end);
+void   list_fill_free (Node *list_nodes, size_t begin, size_t end);
 
 size_t list_free_mem      (List *list);
 size_t list_find_value    (List *list, Elem_t value);
@@ -35,9 +34,5 @@ Elem_t list_pop    (List *list);
 
 Elem_t list_find_value_by_logical_index (List *list, size_t index);
 
-
-// size_t List_insert_first(struct List* list, element_t value);
-
-// size_t List_insert_begin(struct List* list, element_t value);
 
 #endif
